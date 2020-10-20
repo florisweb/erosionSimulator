@@ -57,7 +57,7 @@ function _Renderer(_canvas) {
 	this.drawTile = function(_x, _y, _object) {
 
 		drawTileBox(_x, _y, 0, _object.height, Renderer.materials.brick);
-		drawTileBox(_x, _y, _object.height, _object.height + .4, Renderer.materials.water);
+		drawTileBox(_x, _y, _object.height, _object.height + _object.waterHeight, Renderer.materials.water);
 		// ctx.fillStyle = "#aaa";
 		// ctx.fillText(
 		// 	Math.round(_object.value * 100) / 100, 
