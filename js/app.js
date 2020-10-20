@@ -14,7 +14,7 @@ const App = new function() {
 
 	let lastFrame = new Date();
 	this.update = function() {
-		let dt = .1;// (new Date() - lastFrame) / 1000;
+		let dt = (new Date() - lastFrame) / 1000;
 		Simulation.update(dt);
 
 		

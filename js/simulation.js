@@ -5,18 +5,18 @@
 
 function _Simulation() {
 	this.world = {
-		size: 		new Vector(200, 100),
-		tileSize: 	100,
-		offset: 	new Vector(4, 0),
-		cameraHeightConstant: 	.7,
-		diffusionConstant: 1
+		size: 						new Vector(400, 400),
+		tileSize: 					50,
+		offset: 					new Vector(6, -2.5),
+		cameraHeightConstant: 		.7,
+		diffusionConstant: 			5
 	}
 
 	this.tileGrid = new _Simulation_tileGrid(this.world, 
 		function (x, y) {
 			return {
-				height: (4 - x - y) * .4,
-				waterHeight: .1,
+				height: (14 - x - y) * .2,
+				waterHeight: .3,
 				x: x,
 			}
 		}
@@ -50,23 +50,36 @@ function _Simulation() {
 
 
 	function deltaWaterFormula(_self, _other, _dt) {
-		let totalHeightSelf = _self.height + _self.waterHeight;
-		let totalHeightOther = _other.height + _other.waterHeight;
+		let totalWater = _self.waterHeight + _other.waterHeight;
+		let equalibriumWaterSelf = 0;
+		// let equalibriumWaterOther = 0;
 
-		let dTotalheight = totalHeightOther - totalHeightSelf;
-		let dWaterPlateauDifference = totalHeightOther - _self.height;
-
-		if (dWaterPlateauDifference > 0) return 0;//-deltaWaterFormula(_other, _self, _dt);
-
-
-
-		// let dWater = _other.waterHeight - _self.waterHeight;
-		// console.log(_self.x, dWaterPlateauDifference);
-		let waterChange = _self.waterHeight * dWaterPlateauDifference * Simulation.world.diffusionConstant * _dt;
-		// if (waterChange > 0 && waterChange > _other.waterHeight) waterChange = _other.waterHeight; 
-		// if (waterChange < 0 && waterChange > _self.waterHeight) waterChange = _self.waterHeight; 
 		
-		return waterChange;
+		let dHeight = _other.height - _self.height;
+		if (Math.abs(dHeight) > totalWater)
+		{
+			if (dHeight > 0)
+			{
+				equalibriumWaterSelf 	= totalWater;
+				// equalibriumWaterOther 	= 0; 
+			} else {
+				equalibriumWaterSelf 	= 0;
+				// equalibriumWaterOther	= totalWater; 
+			}
+		} else {
+			let waterLeft = (totalWater - Math.abs(dHeight)) / 2;
+			if (dHeight > 0)
+			{
+				equalibriumWaterSelf 	= dHeight + waterLeft;
+				// equalibriumWaterOther 	= waterLeft;
+			} else {
+				equalibriumWaterSelf 	= waterLeft;
+				// equalibriumWaterOther 	= -dHeight + waterLeft; 
+			}
+		}
+
+
+		return (equalibriumWaterSelf - _self.waterHeight) * Simulation.world.diffusionConstant * _dt;
 	}
 }
 
