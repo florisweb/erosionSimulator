@@ -5,17 +5,31 @@
 
 function _Simulation() {
 	this.world = {
-		size: 		new Vector(300, 300),
-		tileSize: 	40,
-		offset: 	new Vector(7, -3),
+		size: 		new Vector(200, 100),
+		tileSize: 	100,
+		offset: 	new Vector(4, 0),
 		cameraHeightConstant: 	.7,
 		diffusionConstant: 1
 	}
 
-	this.tileGrid = new _Simulation_tileGrid(this.world, function () {return Math.random()});
+	this.tileGrid = new _Simulation_tileGrid(this.world, 
+		function (x, y) {
+			return {
+				height: (4 - x - y) * .4,
+				waterHeight: .1,
+				x: x,
+			}
+		}
+	);
 
 	this.update = function(_dt) {
-		let deltaGrid = new _Simulation_tileGrid(this.world, function () {return 0});
+		let deltaGrid = new _Simulation_tileGrid(this.world, 
+			function () {
+				return {
+					waterHeight: 0
+				}
+			}
+		);
 
 		for (let x = 0; x < this.tileGrid.width; x++) 
 		{
@@ -25,7 +39,7 @@ function _Simulation() {
 
 				for (let n = 0; n < neighbours.length; n++)
 				{
-					deltaGrid[x][y].waterHeight += diffusionFormula(this.tileGrid[x][y], neighbours[n], _dt);
+					deltaGrid[x][y].waterHeight += deltaWaterFormula(this.tileGrid[x][y], neighbours[n], _dt);
 				}
 			}
 		}
@@ -35,9 +49,24 @@ function _Simulation() {
 
 
 
-	function diffusionFormula(_self, _other, _dt) {
-		let dT = _other.waterHeight - _self.waterHeight;
-		return Simulation.world.diffusionConstant * dT * _dt;
+	function deltaWaterFormula(_self, _other, _dt) {
+		let totalHeightSelf = _self.height + _self.waterHeight;
+		let totalHeightOther = _other.height + _other.waterHeight;
+
+		let dTotalheight = totalHeightOther - totalHeightSelf;
+		let dWaterPlateauDifference = totalHeightOther - _self.height;
+
+		if (dWaterPlateauDifference > 0) return 0;//-deltaWaterFormula(_other, _self, _dt);
+
+
+
+		// let dWater = _other.waterHeight - _self.waterHeight;
+		// console.log(_self.x, dWaterPlateauDifference);
+		let waterChange = _self.waterHeight * dWaterPlateauDifference * Simulation.world.diffusionConstant * _dt;
+		// if (waterChange > 0 && waterChange > _other.waterHeight) waterChange = _other.waterHeight; 
+		// if (waterChange < 0 && waterChange > _self.waterHeight) waterChange = _self.waterHeight; 
+		
+		return waterChange;
 	}
 }
 
@@ -62,10 +91,7 @@ function _Simulation_tileGrid(_world, _valueFunction) {
 		tileGrid[x] = []; 
 		for (let y = 0; y < tileGrid.height; y++) 
 		{
-			tileGrid[x][y] = {
-				height: .3, //Math.random() * 3,
-				waterHeight: _valueFunction(),
-			};
+			tileGrid[x][y] = _valueFunction(x, y);
 		}
 	}
 
