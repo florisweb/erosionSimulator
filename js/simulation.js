@@ -40,7 +40,7 @@ function _Simulation_tileGrid(_world, _defaultValue) {
 		for (let y = 0; y < tileGrid.height; y++) 
 		{
 			tileGrid[x][y] = {
-				height: Math.random()
+				height: Math.random() * 3
 			};
 		}
 	}
