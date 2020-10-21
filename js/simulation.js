@@ -18,8 +18,8 @@ function _Simulation() {
 	this.tileGrid = new _Simulation_tileGrid(this.world, 
 		function (x, y) {
 			let obj = {
-				height: Math.random() * 3,
-				waterHeight: 2,
+				height: 3 - Math.pow(x - 3.5, 2) * Math.pow(y - 3.5, 2) * .02,
+				waterHeight: .3,
 			};
 			obj.totalHeight = obj.height + obj.waterHeight;
 			return obj;

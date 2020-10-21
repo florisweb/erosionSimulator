@@ -8,11 +8,11 @@ function _Renderer(_canvas) {
 			type: 0,
 			top: {
 				fillStyle: "rgba(100, 100, 255, .5)",
-				strokeStyle: "rgba(100, 100, 255, .5)",
+				strokeStyle: "rgb(100, 100, 255)",
 			},
 			side: {
 				fillStyle: "rgba(80, 80, 155, .5)",
-				strokeStyle: "rgba(100, 100, 255, .5)",
+				strokeStyle: "rgb(100, 100, 255)",
 			}
 		}, 
 		brick: {
@@ -64,86 +64,47 @@ function _Renderer(_canvas) {
 	this.drawTile = function(_x, _y, _object, xNeightbour, yNeighbour) {
 
 		drawTileBox(_x, _y, 0, _object.height, Renderer.materials.brick, xNeightbour, yNeighbour);
-		if (_object.waterHeight > .001) drawTileBox(_x, _y, _object.height, _object.height + _object.waterHeight, Renderer.materials.water, xNeightbour, yNeighbour);
+		if (_object.waterHeight > .001) drawTileBox(_x, _y, _object.height, _object.waterHeight, Renderer.materials.water, xNeightbour, yNeighbour);
 	}
 
 
-	function drawTileBox(_x, _y, _startElevation = 0, _finalElevation = 1, _material, xNeighbour, yNeighbour) {
-		if (_startElevation > _finalElevation) _finalElevation = _startElevation;
+	function drawTileBox(_x, _y, _startElevation = 0, _waterHeight = 1, _material, xNeighbour, yNeighbour) {
+		let finalElevation = _startElevation + _waterHeight;
 		let startElevationLeft 	= _startElevation;
 		let startElevationRight = _startElevation;
 		
 		if (_material.type == 1)
 		{
+			ctx.globalAlpha = 1;
 			if (xNeighbour.height > startElevationRight) 	startElevationRight = xNeighbour.height;
 			if (yNeighbour.height > startElevationLeft) 	startElevationLeft 	= yNeighbour.height;
 		} else {
+			ctx.globalAlpha = _waterHeight * 7;
 			if (xNeighbour.totalHeight > startElevationRight) 	startElevationRight = xNeighbour.totalHeight;
 			if (yNeighbour.totalHeight > startElevationLeft) 	startElevationLeft 	= yNeighbour.totalHeight;
 		}
 
 
-		let elevatedTopCoord 	= worldCoordToCanvCoord(new Vector(_x - _finalElevation, 		_y - _finalElevation));
-		let elevatedRightCoord 	= worldCoordToCanvCoord(new Vector(_x + 1 - _finalElevation, 	_y - _finalElevation));
-		let elevatedBottomCoord = worldCoordToCanvCoord(new Vector(_x + 1 - _finalElevation, 	_y + 1 - _finalElevation));
-		let elevatedLeftCoord 	= worldCoordToCanvCoord(new Vector(_x - _finalElevation, 		_y + 1 - _finalElevation));
+		let elevatedTopCoord 	= worldCoordToCanvCoord(new Vector(_x - finalElevation, 		_y - finalElevation));
+		let elevatedRightCoord 	= worldCoordToCanvCoord(new Vector(_x - finalElevation + 1, 	_y - finalElevation));
+		let elevatedBottomCoord = worldCoordToCanvCoord(new Vector(_x - finalElevation + 1, 	_y - finalElevation + 1));
+		let elevatedLeftCoord 	= worldCoordToCanvCoord(new Vector(_x - finalElevation, 		_y - finalElevation + 1));
 		drawTileTop(elevatedTopCoord, elevatedRightCoord, elevatedBottomCoord, elevatedLeftCoord, _material.top);
-		
-		// drawTileSides(elevatedTopCoord, elevatedRightCoord, elevatedBottomCoord, elevatedLeftCoord, _x, _y, _startElevation, _material.side);
-		
-		if (startElevationLeft < _finalElevation) 
+				
+		if (startElevationLeft < finalElevation) 
 		{
 			let leftGroundCoord 		= worldCoordToCanvCoord(new Vector(_x - startElevationLeft, 		_y + 1 - startElevationLeft));
 			let bottomLeftGroundCoord 	= worldCoordToCanvCoord(new Vector(_x + 1 - startElevationLeft, 	_y + 1 - startElevationLeft));
 			drawTileSide(elevatedBottomCoord, elevatedLeftCoord,  bottomLeftGroundCoord, leftGroundCoord,  _material.side);
 		}
 
-		if (startElevationRight < _finalElevation) 
+		if (startElevationRight < finalElevation) 
 		{
 			let rightGroundCoord 		= worldCoordToCanvCoord(new Vector(_x + 1 - startElevationRight, 	_y - startElevationRight));
 			let bottomRightGroundCoord 	= worldCoordToCanvCoord(new Vector(_x + 1 - startElevationRight, 	_y + 1 - startElevationRight));
 			drawTileSide(elevatedBottomCoord, elevatedRightCoord, bottomRightGroundCoord, rightGroundCoord, _material.side);
 		}
 	}	
-
-
-
-	function drawTileSides(elevatedTopCoord, elevatedRightCoord, elevatedBottomCoord, elevatedLeftCoord, _x, _y, _startElevation, _color) {
-		let rightGroundCoord 	= worldCoordToCanvCoord(new Vector(_x + 1 - _startElevation, 	_y - _startElevation));
-		let bottomGroundCoord 	= worldCoordToCanvCoord(new Vector(_x + 1 - _startElevation, 	_y + 1 - _startElevation));
-		let leftGroundCoord 	= worldCoordToCanvCoord(new Vector(_x - _startElevation, 		_y + 1 - _startElevation));
-
-		ctx.strokeStyle = _color.strokeStyle;
-		ctx.fillStyle 	= _color.fillStyle;
-		ctx.beginPath();
-
-		ctx.moveTo(elevatedLeftCoord.value[0], 		elevatedLeftCoord.value[1]);
-		ctx.lineTo(elevatedBottomCoord.value[0], 	elevatedBottomCoord.value[1]);
-		ctx.lineTo(bottomGroundCoord.value[0], 		bottomGroundCoord.value[1]);
-		ctx.lineTo(leftGroundCoord.value[0], 		leftGroundCoord.value[1]);
-		ctx.lineTo(elevatedLeftCoord.value[0], 		elevatedLeftCoord.value[1]);
-		
-		ctx.closePath();
-		ctx.stroke();
-		ctx.fill();
-
-
-		ctx.strokeStyle = _color.strokeStyle;
-		ctx.fillStyle 	= _color.fillStyle;
-		ctx.beginPath();
-
-		ctx.moveTo(elevatedRightCoord.value[0], 	elevatedRightCoord.value[1]);
-		ctx.lineTo(elevatedBottomCoord.value[0], 	elevatedBottomCoord.value[1]);
-		ctx.lineTo(bottomGroundCoord.value[0], 		bottomGroundCoord.value[1]);
-		ctx.lineTo(rightGroundCoord.value[0], 		rightGroundCoord.value[1]);
-		ctx.lineTo(elevatedRightCoord.value[0], 	elevatedRightCoord.value[1]);
-		
-		ctx.closePath();
-		ctx.stroke();
-		ctx.fill();
-	}
-
-
 
 	function drawTileSide(elevatedBottomCoord, elevatedSideCoord, bottomGroundCoord, sideGroundCoord, _color) {
 		ctx.strokeStyle = _color.strokeStyle;
