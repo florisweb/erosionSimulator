@@ -5,18 +5,21 @@
 
 function _Simulation() {
 	this.world = {
-		size: 						new Vector(400, 400),
-		tileSize: 					50,
-		offset: 					new Vector(6, -2.5),
+		size: 						new Vector(300, 300),
+		tileSize: 					40,
+		offset: 					new Vector(370, -50),
 		cameraHeightConstant: 		.7,
-		diffusionConstant: 			5
+		waterFlowConstant: 			1,
+		materialFlowConstant: 		.1
 	}
+
+	this.world.offset.scale(1 / this.world.tileSize);
 
 	this.tileGrid = new _Simulation_tileGrid(this.world, 
 		function (x, y) {
 			return {
-				height: (14 - x - y) * .2,
-				waterHeight: .3,
+				height: Math.random() * 3,
+				waterHeight: 2,
 				x: x,
 			}
 		}
@@ -39,7 +42,9 @@ function _Simulation() {
 
 				for (let n = 0; n < neighbours.length; n++)
 				{
-					deltaGrid[x][y].waterHeight += deltaWaterFormula(this.tileGrid[x][y], neighbours[n], _dt);
+					let waterFlow = deltaWaterFormula(this.tileGrid[x][y], neighbours[n], _dt);
+					deltaGrid[x][y].waterHeight += waterFlow;
+					deltaGrid[x][y].height += waterFlow * Simulation.world.materialFlowConstant;
 				}
 			}
 		}
@@ -52,7 +57,6 @@ function _Simulation() {
 	function deltaWaterFormula(_self, _other, _dt) {
 		let totalWater = _self.waterHeight + _other.waterHeight;
 		let equalibriumWaterSelf = 0;
-		// let equalibriumWaterOther = 0;
 
 		
 		let dHeight = _other.height - _self.height;
@@ -61,25 +65,23 @@ function _Simulation() {
 			if (dHeight > 0)
 			{
 				equalibriumWaterSelf 	= totalWater;
-				// equalibriumWaterOther 	= 0; 
 			} else {
 				equalibriumWaterSelf 	= 0;
-				// equalibriumWaterOther	= totalWater; 
 			}
 		} else {
 			let waterLeft = (totalWater - Math.abs(dHeight)) / 2;
-			if (dHeight > 0)
-			{
-				equalibriumWaterSelf 	= dHeight + waterLeft;
-				// equalibriumWaterOther 	= waterLeft;
-			} else {
-				equalibriumWaterSelf 	= waterLeft;
-				// equalibriumWaterOther 	= -dHeight + waterLeft; 
-			}
+			equalibriumWaterSelf = waterLeft;
+			if (dHeight > 0) equalibriumWaterSelf += dHeight;
 		}
 
 
-		return (equalibriumWaterSelf - _self.waterHeight) * Simulation.world.diffusionConstant * _dt;
+		return (equalibriumWaterSelf - _self.waterHeight) * Simulation.world.waterFlowConstant * _dt;
+	}
+
+
+	this.rain = function(_height) {
+		let rainGrid = new _Simulation_tileGrid(this.world, function () {return {waterHeight: _height}});
+		this.tileGrid.addGrid(rainGrid);
 	}
 }
 

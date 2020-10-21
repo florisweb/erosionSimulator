@@ -13,13 +13,17 @@ const App = new function() {
 
 
 	let lastFrame = new Date();
+	let startTime = new Date();
+	this.updates = 0;
 	this.update = function() {
+		App.updates++;
 		let dt = (new Date() - lastFrame) / 1000;
 		Simulation.update(dt);
-
+		window.dt = dt;
 		
 		lastFrame = new Date();
 		setTimeout(App.update, 0);
+		if (App.updates == 1000) console.warn("Time: ", (new Date() - startTime) / 1000);
 	}
 
 	this.draw = function() {
