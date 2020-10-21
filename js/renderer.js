@@ -39,32 +39,20 @@ function _Renderer(_canvas) {
 		{
 			for (let y = 0; y < _tileGrid[x].length; y++) 
 			{
-				let xNeightbour = false;
-				let yNeightbour = false;
-				if (_tileGrid[x + 1]) xNeightbour = _tileGrid[x + 1][y];
-				if (_tileGrid[x][y + 1]) yNeightbour = _tileGrid[x][y + 1];
+				let xNeighbour 				= false;
+				let yNeighbour 				= false;
+				if (_tileGrid[x + 1]) 		xNeighbour = _tileGrid[x + 1][y];
+				if (_tileGrid[x][y + 1]) 	yNeighbour = _tileGrid[x][y + 1];
 
-				this.drawTile(x, y, _tileGrid[x][y], xNeightbour, yNeightbour);
+				this.drawTile(x, y, _tileGrid[x][y], xNeighbour, yNeighbour);
 			}
 		}
-
-
-		// ctx.fillStyle = "#aaa";
-		// ctx.fillText(
-		// 	"Velocity: " + Math.round(Simulation.object.velocity * 10) / 10 + " m/s",
-		// 	10, 20
-		// );
-		// ctx.fillText(
-		// 	"Air resistance: " + Math.round(Simulation.object.curAirResistance * 100) / 100 + " N?",
-		// 	10, 35
-		// );
 	}
 
 
-	this.drawTile = function(_x, _y, _object, xNeightbour, yNeighbour) {
-
-		drawTileBox(_x, _y, 0, _object.height, Renderer.materials.brick, xNeightbour, yNeighbour);
-		if (_object.waterHeight > .001) drawTileBox(_x, _y, _object.height, _object.waterHeight, Renderer.materials.water, xNeightbour, yNeighbour);
+	this.drawTile = function(_x, _y, _object, xNeighbour, yNeighbour) {
+		drawTileBox(_x, _y, 0, _object.height, Renderer.materials.brick, xNeighbour, yNeighbour);
+		if (_object.waterHeight > .001) drawTileBox(_x, _y, _object.height, _object.waterHeight, Renderer.materials.water, xNeighbour, yNeighbour);
 	}
 
 
