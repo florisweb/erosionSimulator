@@ -19,19 +19,18 @@ const App = new function() {
 		App.updates++;
 		let dt = (new Date() - lastFrame) / 1000;
 		Simulation.update(dt);
-		window.dt = dt;
 		
 		lastFrame = new Date();
 		setTimeout(App.update, 0);
-		if (App.updates == 1000) console.warn("Time: ", (new Date() - startTime) / 1000);
 	}
 
+	this.frames = 0;
 	this.draw = function() {
+		App.frames++;
 		Renderer.draw(Simulation.tileGrid);
 
-
 		requestAnimationFrame(App.draw);
-		// setTimeout(App.update, 1);
+		if (App.frames == 500) console.warn("Time: ", (new Date() - startTime) / 1000);
 	}
 }
 

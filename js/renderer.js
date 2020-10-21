@@ -5,6 +5,7 @@ function _Renderer(_canvas) {
 
 	this.materials = {
 		water: {
+			type: 0,
 			top: {
 				fillStyle: "rgba(100, 100, 255, .5)",
 				strokeStyle: "rgba(100, 100, 255, .5)",
@@ -15,6 +16,7 @@ function _Renderer(_canvas) {
 			}
 		}, 
 		brick: {
+			type: 1,
 			top: {
 				fillStyle: "#eee",
 				strokeStyle: "#777",
@@ -68,11 +70,17 @@ function _Renderer(_canvas) {
 
 	function drawTileBox(_x, _y, _startElevation = 0, _finalElevation = 1, _material, xNeighbour, yNeighbour) {
 		if (_startElevation > _finalElevation) _finalElevation = _startElevation;
-		let startElevationLeft = _startElevation;
-		if (yNeighbour.height > startElevationLeft) startElevationLeft = yNeighbour.height;
-
+		let startElevationLeft 	= _startElevation;
 		let startElevationRight = _startElevation;
-		if (xNeighbour.height > startElevationRight) startElevationRight = xNeighbour.height;
+		
+		if (_material.type == 1)
+		{
+			if (xNeighbour.height > startElevationRight) 	startElevationRight = xNeighbour.height;
+			if (yNeighbour.height > startElevationLeft) 	startElevationLeft 	= yNeighbour.height;
+		} else {
+			if (xNeighbour.totalHeight > startElevationRight) 	startElevationRight = xNeighbour.totalHeight;
+			if (yNeighbour.totalHeight > startElevationLeft) 	startElevationLeft 	= yNeighbour.totalHeight;
+		}
 
 
 		let elevatedTopCoord 	= worldCoordToCanvCoord(new Vector(_x - _finalElevation, 		_y - _finalElevation));
@@ -82,7 +90,6 @@ function _Renderer(_canvas) {
 		drawTileTop(elevatedTopCoord, elevatedRightCoord, elevatedBottomCoord, elevatedLeftCoord, _material.top);
 		
 		// drawTileSides(elevatedTopCoord, elevatedRightCoord, elevatedBottomCoord, elevatedLeftCoord, _x, _y, _startElevation, _material.side);
-
 		
 		if (startElevationLeft < _finalElevation) 
 		{
