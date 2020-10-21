@@ -2,6 +2,11 @@
 function _Renderer(_canvas) {
 	let Canvas 	= _canvas;
 	let ctx 	= Canvas.getContext("2d");
+	this.config = {
+		minimumAverageFlowForUpdate: 0.001,
+		minimumFlowForUpdate: 0.000
+	};
+
 
 	this.materials = {
 		water: {
@@ -24,6 +29,28 @@ function _Renderer(_canvas) {
 			side: {
 				fillStyle: "#888",
 				strokeStyle: "#777",
+			}
+		},
+		source: {
+			type: 1,
+			top: {
+				fillStyle: "#e00",
+				strokeStyle: "#700",
+			},
+			side: {
+				fillStyle: "#800",
+				strokeStyle: "#700",
+			}
+		},
+		drain: {
+			type: 1,
+			top: {
+				fillStyle: "#00e",
+				strokeStyle: "#007",
+			},
+			side: {
+				fillStyle: "#008",
+				strokeStyle: "#007",
 			}
 		}
 	}
@@ -65,7 +92,11 @@ function _Renderer(_canvas) {
 
 
 	this.drawTile = function(_x, _y, _object, xNeighbour, yNeighbour) {
-		drawTileBox(_x, _y, 0, _object.height, Renderer.materials.brick, xNeighbour, yNeighbour);
+		let material = Renderer.materials.brick;
+		if (_object.isDrain) material = Renderer.materials.drain;
+		if (_object.isSource) material = Renderer.materials.source;
+		
+		drawTileBox(_x, _y, 0, _object.height, material, xNeighbour, yNeighbour);
 		if (_object.waterHeight > .001) drawTileBox(_x, _y, _object.height, _object.waterHeight, Renderer.materials.water, xNeighbour, yNeighbour);
 	}
 

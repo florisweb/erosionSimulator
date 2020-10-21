@@ -5,11 +5,11 @@
 
 function _Simulation() {
 	this.world = {
-		size: 						new Vector(500, 100),
+		size: 						new Vector(500, 200),
 		tileSize: 					10,
-		offset: 					new Vector(300, 60),
+		offset: 					new Vector(300, 0),
 		cameraHeightConstant: 		.7,
-		waterFlowConstant: 			2,
+		waterFlowConstant: 			5,
 		materialFlowConstant: 		.5,
 	}
 
@@ -18,12 +18,16 @@ function _Simulation() {
 	this.tileGrid = new _Simulation_tileGrid(this.world, 
 		function (x, y) {
 			let obj = {
-				height: Math.pow(x - 50, 2) * .005 * (Math.random() * .3 + .7) + 3,
-				waterHeight: 0,
+				height: 		x * (5 - y) * .01 + 10 + Math.random() * 5,
+				// height: 5,
+				waterHeight: 	0,
+				isDrain: 		x == 500 / 10 - 1,
+				isSource: 		x == 0 && y == 0
 			};
-			if (x == 1000 / 20 - 1) obj.height = 0;
-
+			if (obj.isDrain) obj.height = 0;
+			if (obj.isSource) obj.height = 50;
 			obj.totalHeight = obj.height + obj.waterHeight;
+
 			return obj;
 		}
 	);
@@ -39,6 +43,7 @@ function _Simulation() {
 			}
 		);
 		let deltaFlow = 0;
+		let maxFlow = 0;
 		for (let x = 0; x < this.tileGrid.width; x++) 
 		{
 			for (let y = 0; y < this.tileGrid.height; y++) 
@@ -50,18 +55,28 @@ function _Simulation() {
 					let waterFlow 				= deltaWaterFormula(this.tileGrid[x][y], neighbours[n], _dt);
 					deltaFlow 					+= Math.abs(waterFlow);
 					deltaGrid[x][y].waterHeight += waterFlow;
-					deltaGrid[x][y].height 		+= waterFlow * Simulation.world.materialFlowConstant;
-					if (x != this.tileGrid.width - 1) continue;
 
-					deltaGrid[x][y].waterHeight += this.tileGrid[x][y].waterHeight * -.1;
-					deltaGrid[x][y].height 		= 0;
+					let sandFlow = waterFlow * Simulation.world.materialFlowConstant;
+					if (sandFlow < 0 && this.tileGrid[x][y].height < neighbours[n].height) sandFlow = 0;
+					if (sandFlow > 0 && this.tileGrid[x][y].height > neighbours[n].height) sandFlow = 0;
+					deltaGrid[x][y].height += sandFlow;
+
+					
+					if (waterFlow > maxFlow) maxFlow = waterFlow;
+					if (this.tileGrid[x][y].isSource) this.tileGrid[x][y].waterHeight = 1;
+					if (this.tileGrid[x][y].isDrain) 
+					{
+						deltaGrid[x][y].waterHeight -= this.tileGrid[x][y].waterHeight * .005;
+						deltaGrid[x][y].height 		-= this.tileGrid[x][y].height * .005;
+					}
 				}
 			}
 		}
 
 		this.tileGrid.addGrid(deltaGrid);
 		window.deltaFlow = deltaFlow;
-		return deltaFlow > 0.001 * tileCount;
+		window.maxFlow = maxFlow;
+		return deltaFlow > Renderer.config.minimumAverageFlowForUpdate * tileCount || maxFlow > Renderer.config.minimumFlowForUpdate;
 	}
 
 
