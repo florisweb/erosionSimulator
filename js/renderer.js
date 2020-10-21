@@ -8,11 +8,11 @@ function _Renderer(_canvas) {
 			type: 0,
 			top: {
 				fillStyle: "rgba(100, 100, 255, .5)",
-				strokeStyle: "rgb(100, 100, 255)",
+				strokeStyle: "rgba(100, 100, 255, .5)",// "rgb(100, 100, 255)",
 			},
 			side: {
 				fillStyle: "rgba(80, 80, 155, .5)",
-				strokeStyle: "rgb(100, 100, 255)",
+				strokeStyle: "rgba(80, 80, 155, .0)",// "rgb(100, 100, 255)",
 			}
 		}, 
 		brick: {
@@ -23,7 +23,7 @@ function _Renderer(_canvas) {
 			},
 			side: {
 				fillStyle: "#888",
-				strokeStyle: "#333",
+				strokeStyle: "#777",
 			}
 		}
 	}
@@ -32,8 +32,17 @@ function _Renderer(_canvas) {
 		ctx.clearRect(0, 0, Canvas.width, Canvas.height);
 	}
 
+	let lastFPSUpdate = new Date();
+	const framesPerFPSSample = 3;
+	let fpsValue = 0;
+
 	this.draw = function(_tileGrid) {
 		this.clear();
+		ctx.globalAlpha = 1;
+		ctx.fillStyle 	= "#666";
+		ctx.fillText("Fps: " + fpsValue, 10, 20);
+		ctx.fillText("DeltaFlow: " + window.deltaFlow, 10, 35);
+
 
 		for (let x = 0; x < _tileGrid.length; x++) 
 		{
@@ -47,6 +56,11 @@ function _Renderer(_canvas) {
 				this.drawTile(x, y, _tileGrid[x][y], xNeighbour, yNeighbour);
 			}
 		}
+
+		if (App.frames % framesPerFPSSample != 0) return;
+		let dt 			= new Date() - lastFPSUpdate;
+		fpsValue		= Math.round(10000 * framesPerFPSSample / dt) / 10;
+		lastFPSUpdate 	= new Date();
 	}
 
 
@@ -95,8 +109,8 @@ function _Renderer(_canvas) {
 	}	
 
 	function drawTileSide(elevatedBottomCoord, elevatedSideCoord, bottomGroundCoord, sideGroundCoord, _color) {
-		ctx.strokeStyle = _color.strokeStyle;
-		ctx.fillStyle 	= _color.fillStyle;
+		if (_color.strokeStyle) ctx.strokeStyle = _color.strokeStyle;
+		ctx.fillStyle = _color.fillStyle;
 		ctx.beginPath();
 
 		ctx.moveTo(elevatedSideCoord.value[0], 		elevatedSideCoord.value[1]);
@@ -106,14 +120,14 @@ function _Renderer(_canvas) {
 		ctx.lineTo(elevatedSideCoord.value[0], 		elevatedSideCoord.value[1]);
 		
 		ctx.closePath();
-		ctx.stroke();
+		if (_color.strokeStyle) ctx.stroke();
 		ctx.fill();
 	}
 	
 	function drawTileTop(elevatedTopCoord, elevatedRightCoord, elevatedBottomCoord, elevatedLeftCoord, _color) {
 		// Draws the plate
-		ctx.strokeStyle = _color.strokeStyle;
-		ctx.fillStyle 	= _color.fillStyle;
+		if (_color.strokeStyle) ctx.strokeStyle = _color.strokeStyle;
+		ctx.fillStyle = _color.fillStyle;
 		ctx.beginPath();
 
 		ctx.moveTo(elevatedTopCoord.value[0], 		elevatedTopCoord.value[1]);
@@ -123,7 +137,7 @@ function _Renderer(_canvas) {
 		ctx.lineTo(elevatedTopCoord.value[0], 		elevatedTopCoord.value[1]);
 		ctx.closePath();
 		
-		ctx.stroke();
+		if (_color.strokeStyle)ctx.stroke();
 		ctx.fill();
 
 	}

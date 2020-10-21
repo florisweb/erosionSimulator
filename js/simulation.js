@@ -5,12 +5,12 @@
 
 function _Simulation() {
 	this.world = {
-		size: 						new Vector(300, 300),
-		tileSize: 					20,
-		offset: 					new Vector(370, -50),
+		size: 						new Vector(500, 100),
+		tileSize: 					10,
+		offset: 					new Vector(300, 60),
 		cameraHeightConstant: 		.7,
-		waterFlowConstant: 			1,
-		materialFlowConstant: 		.1
+		waterFlowConstant: 			2,
+		materialFlowConstant: 		.5,
 	}
 
 	this.world.offset.scale(1 / this.world.tileSize);
@@ -18,9 +18,11 @@ function _Simulation() {
 	this.tileGrid = new _Simulation_tileGrid(this.world, 
 		function (x, y) {
 			let obj = {
-				height: 7.2 - Math.pow(x - 7, 2) * Math.pow(y - 7, 2) * .003,
-				waterHeight: .3,
+				height: Math.pow(x - 50, 2) * .005 * (Math.random() * .3 + .7) + 3,
+				waterHeight: 0,
 			};
+			if (x == 1000 / 20 - 1) obj.height = 0;
+
 			obj.totalHeight = obj.height + obj.waterHeight;
 			return obj;
 		}
@@ -46,14 +48,19 @@ function _Simulation() {
 				for (let n = 0; n < neighbours.length; n++)
 				{
 					let waterFlow 				= deltaWaterFormula(this.tileGrid[x][y], neighbours[n], _dt);
-					deltaFlow += Math.abs(waterFlow);
+					deltaFlow 					+= Math.abs(waterFlow);
 					deltaGrid[x][y].waterHeight += waterFlow;
 					deltaGrid[x][y].height 		+= waterFlow * Simulation.world.materialFlowConstant;
+					if (x != this.tileGrid.width - 1) continue;
+
+					deltaGrid[x][y].waterHeight += this.tileGrid[x][y].waterHeight * -.1;
+					deltaGrid[x][y].height 		= 0;
 				}
 			}
 		}
 
 		this.tileGrid.addGrid(deltaGrid);
+		window.deltaFlow = deltaFlow;
 		return deltaFlow > 0.001 * tileCount;
 	}
 
@@ -85,7 +92,7 @@ function _Simulation() {
 
 
 	this.rain = function(_height) {
-		let rainGrid = new _Simulation_tileGrid(this.world, function () {return {waterHeight: _height}});
+		let rainGrid = new _Simulation_tileGrid(this.world, function () {return {waterHeight: _height, height: 0}});
 		this.tileGrid.addGrid(rainGrid);
 	}
 }
