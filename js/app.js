@@ -14,8 +14,9 @@ const App = new function() {
 
 	let lastFrame = new Date();
 	let startTime = new Date();
-	this.updates = 0;
 	let requestRedraw = true;
+
+	this.updates = 0;
 	this.update = function() {
 		App.updates++;
 		let dt = (new Date() - lastFrame) / 1000;
@@ -25,6 +26,8 @@ const App = new function() {
 		
 		lastFrame = new Date();
 		setTimeout(App.update, 0);
+
+		if (App.updates == 1000) console.warn("Time: ", (new Date() - startTime) / 1000);
 	}
 
 	this.frames = 0;
@@ -37,8 +40,6 @@ const App = new function() {
 		}
 
 		requestAnimationFrame(App.draw);
-		// setTimeout(App.draw, 0);
-		if (App.frames == 500) console.warn("Time: ", (new Date() - startTime) / 1000);
 	}
 }
 

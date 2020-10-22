@@ -1,12 +1,8 @@
 
-
-
-
-
 function _Simulation() {
 	this.world = {
 		size: 						new Vector(400, 300),
-		tileSize: 					100,
+		tileSize: 					10,
 		offset: 					new Vector(300, -50),
 		cameraHeightConstant: 		.7,
 		waterFlowConstant: 			1,
@@ -34,6 +30,7 @@ function _Simulation() {
 	);
 	const tileCount = this.tileGrid.width * this.tileGrid.height;
 
+
 	this.update = function(_dt) {
 		let deltaGrid = new _Simulation_tileGrid(this.world, 
 			function () {
@@ -46,38 +43,44 @@ function _Simulation() {
 		);
 		let deltaFlow = 0;
 		let maxFlow = 0;
-		for (let x = 0; x < this.tileGrid.width; x++) 
+		for (let y = 0; y < this.tileGrid.height; y++) 
 		{
-			for (let y = 0; y < this.tileGrid.height; y++) 
+			for (let x = y % 2; x < this.tileGrid.width; x += 2) 
 			{
 				let neighbours = this.tileGrid.getNeighboursByCoord(x, y);
 
 				for (let n = 0; n < neighbours.length; n++)
 				{
-					let waterFlow 				= deltaWaterFormula(this.tileGrid[x][y], neighbours[n], _dt);
-					deltaFlow 					+= Math.abs(waterFlow);
-					deltaGrid[x][y].waterHeight += waterFlow;
+					let curN = neighbours[n];
+					let waterFlow 							= deltaWaterFormula(this.tileGrid[x][y], curN.tile, _dt);
+					deltaFlow 								+= Math.abs(waterFlow);
+					deltaGrid[x][y].waterHeight 			+= waterFlow;
+					deltaGrid[curN.x][curN.y].waterHeight 	-= waterFlow;
 
-					let sandFlow = deltaSandFormula(waterFlow, this.tileGrid[x][y], neighbours[n]);
-					deltaGrid[x][y].height += sandFlow;
+					let sandFlow							= deltaSandFormula(waterFlow, this.tileGrid[x][y], curN.tile);
+					deltaGrid[x][y].height 					+= sandFlow;
+					deltaGrid[curN.x][curN.y].height 		-= sandFlow;
 
 					if (sandFlow > 0) //grainsize only changes when sand is added
 					{
-						let totalGrains 			= this.tileGrid[x][y].height * this.tileGrid[x][y].grainSize + sandFlow * neighbours[n].grainSize;
+						let totalGrains 			= this.tileGrid[x][y].height * this.tileGrid[x][y].grainSize + sandFlow * curN.tile.grainSize;
 					 	let newGrainSize 			= totalGrains / (this.tileGrid[x][y].height + sandFlow);
 					 	deltaGrid[x][y].grainSize 	= newGrainSize - this.tileGrid[x][y].grainSize;
 					}
 					
 	
 					if (waterFlow > maxFlow) maxFlow = waterFlow;
-					if (this.tileGrid[x][y].isDrain) 
-					{
-						deltaGrid[x][y].waterHeight -= this.tileGrid[x][y].waterHeight * .01;
-						deltaGrid[x][y].height 		-= this.tileGrid[x][y].height * .01;
-					}
+					
 				}
 			}
 		}
+
+		// ON OWN LOOP
+		// if (this.tileGrid[x][y].isDrain) 
+		// 			{
+		// 				deltaGrid[x][y].waterHeight -= this.tileGrid[x][y].waterHeight * .01;
+		// 				deltaGrid[x][y].height 		-= this.tileGrid[x][y].height * .01;
+		// 			}
 
 		this.tileGrid.addGrid(deltaGrid);
 		window.deltaFlow = deltaFlow;
@@ -155,16 +158,18 @@ function _Simulation_tileGrid(_world, _valueFunction) {
 	}
 
 
+
 	tileGrid.getNeighboursByCoord = function(x, y) {
 		let neighbours = [];
 
-		if (x - 1 >= 0) 			neighbours.push(this[x - 1][y]);
-		if (x + 1 < this.width) 	neighbours.push(this[x + 1][y]);
-		if (y - 1 >= 0) 			neighbours.push(this[x][y - 1]);
-		if (y + 1 < this.height) 	neighbours.push(this[x][y + 1]);
+		if (x - 1 >= 0) 			neighbours.push({tile: this[x - 1][y], x: x - 1, y: y});
+		if (x + 1 < this.width) 	neighbours.push({tile: this[x + 1][y], x: x + 1, y: y});
+		if (y - 1 >= 0) 			neighbours.push({tile: this[x][y - 1], x: x, y: y - 1});
+		if (y + 1 < this.height) 	neighbours.push({tile: this[x][y + 1], x: x, y: y + 1});
 
 		return neighbours;
 	}
+
 
 	tileGrid.addGrid = function(_grid) {
 		for (let x = 0; x < this.width; x++) 

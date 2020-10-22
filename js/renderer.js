@@ -55,6 +55,10 @@ function _Renderer(_canvas) {
 		}
 	}
 
+
+
+	this.camera = new _Renderer_camera();
+
 	this.clear = function() {
 		ctx.clearRect(0, 0, Canvas.width, Canvas.height);
 	}
@@ -193,8 +197,20 @@ function _Renderer(_canvas) {
 
 		return new Vector(x, y);
 	}
+}
 
-	this.worldCoordToCanvCoord = worldCoordToCanvCoord;
+
+
+
+
+
+
+function _Renderer_camera() {
+	this.position 	= new Vector(0, 0);
+	this.zoom 		= 1;
 
 
 }
+
+
+
