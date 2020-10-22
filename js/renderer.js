@@ -122,23 +122,23 @@ function _Renderer(_canvas) {
 		}
 
 
-		let elevatedTopCoord 	= worldCoordToCanvCoord(new Vector(_x - finalElevation, 		_y - finalElevation));
-		let elevatedRightCoord 	= worldCoordToCanvCoord(new Vector(_x - finalElevation + 1, 	_y - finalElevation));
-		let elevatedBottomCoord = worldCoordToCanvCoord(new Vector(_x - finalElevation + 1, 	_y - finalElevation + 1));
-		let elevatedLeftCoord 	= worldCoordToCanvCoord(new Vector(_x - finalElevation, 		_y - finalElevation + 1));
+		let elevatedTopCoord 	= Renderer.camera.worldCoordToCanvCoord(new Vector(_x - finalElevation, 		_y - finalElevation));
+		let elevatedRightCoord 	= Renderer.camera.worldCoordToCanvCoord(new Vector(_x - finalElevation + 1, 	_y - finalElevation));
+		let elevatedBottomCoord = Renderer.camera.worldCoordToCanvCoord(new Vector(_x - finalElevation + 1, 	_y - finalElevation + 1));
+		let elevatedLeftCoord 	= Renderer.camera.worldCoordToCanvCoord(new Vector(_x - finalElevation, 		_y - finalElevation + 1));
 		drawTileTop(elevatedTopCoord, elevatedRightCoord, elevatedBottomCoord, elevatedLeftCoord, _material.top);
 				
 		if (startElevationLeft < finalElevation) 
 		{
-			let leftGroundCoord 		= worldCoordToCanvCoord(new Vector(_x - startElevationLeft, 		_y + 1 - startElevationLeft));
-			let bottomLeftGroundCoord 	= worldCoordToCanvCoord(new Vector(_x + 1 - startElevationLeft, 	_y + 1 - startElevationLeft));
+			let leftGroundCoord 		= Renderer.camera.worldCoordToCanvCoord(new Vector(_x - startElevationLeft, 		_y + 1 - startElevationLeft));
+			let bottomLeftGroundCoord 	= Renderer.camera.worldCoordToCanvCoord(new Vector(_x + 1 - startElevationLeft, 	_y + 1 - startElevationLeft));
 			drawTileSide(elevatedBottomCoord, elevatedLeftCoord,  bottomLeftGroundCoord, leftGroundCoord,  _material.side);
 		}
 
 		if (startElevationRight < finalElevation) 
 		{
-			let rightGroundCoord 		= worldCoordToCanvCoord(new Vector(_x + 1 - startElevationRight, 	_y - startElevationRight));
-			let bottomRightGroundCoord 	= worldCoordToCanvCoord(new Vector(_x + 1 - startElevationRight, 	_y + 1 - startElevationRight));
+			let rightGroundCoord 		= Renderer.camera.worldCoordToCanvCoord(new Vector(_x + 1 - startElevationRight, 	_y - startElevationRight));
+			let bottomRightGroundCoord 	= Renderer.camera.worldCoordToCanvCoord(new Vector(_x + 1 - startElevationRight, 	_y + 1 - startElevationRight));
 			drawTileSide(elevatedBottomCoord, elevatedRightCoord, bottomRightGroundCoord, rightGroundCoord, _material.side);
 		}
 
@@ -185,18 +185,6 @@ function _Renderer(_canvas) {
 	function valueToColor(_value) {
 		return "rgb(" + _value * 51 + ", 0, 0)";
 	}
-
-
-	const tileConstantX = Simulation.world.tileSize / Math.sqrt(2);
-	
-	function worldCoordToCanvCoord(_coord) {
-		const tileConstantY = Simulation.world.tileSize / Math.sqrt(2) * Simulation.world.cameraHeightConstant;
-		let newCoord = _coord.copy().add(Simulation.world.offset);
-		let x = (newCoord.value[0] - newCoord.value[1]) * tileConstantX;
-		let y = (newCoord.value[0] + newCoord.value[1]) * tileConstantY;
-
-		return new Vector(x, y);
-	}
 }
 
 
@@ -206,10 +194,34 @@ function _Renderer(_canvas) {
 
 
 function _Renderer_camera() {
-	this.position 	= new Vector(0, 0);
+	this.position 	= new Vector(9, 1);
 	this.zoom 		= 1;
 
+	let tileConstantX = Simulation.world.tileSize / Math.sqrt(2) * this.zoom;
+	let tileConstantY = Simulation.world.tileSize / Math.sqrt(2) * Simulation.world.cameraHeightConstant * this.zoom;
 
+	this.updateZoom = function(_newZoom) {
+		if (_newZoom < .1) _newZoom = .1;
+		this.zoom 		= _newZoom;
+		tileConstantX 	= Simulation.world.tileSize / Math.sqrt(2) * this.zoom;
+		tileConstantY 	= Simulation.world.tileSize / Math.sqrt(2) * Simulation.world.cameraHeightConstant * this.zoom;
+	}
+
+	this.worldCoordToCanvCoord = function(_coord) {
+		let newCoord = _coord.copy().add(Simulation.world.offset).add(this.position);
+		let x = (newCoord.value[0] - newCoord.value[1]) * tileConstantX;
+		let y = (newCoord.value[0] + newCoord.value[1]) * tileConstantY;
+
+		return new Vector(x, y);
+	}
+
+	this.canvCoordToWorldCoord = function(_coord) {
+		let newCoord = new Vector(0, 0);
+		newCoord.value[1] = (_coord.value[1] / tileConstantY - _coord.value[0] / tileConstantX) * .5;
+		newCoord.value[0] = _coord.value[0] / tileConstantX + newCoord.value[1];
+
+		return newCoord.add(Simulation.world.offset.copy().add(this.position).scale(-1));
+	}
 }
 
 

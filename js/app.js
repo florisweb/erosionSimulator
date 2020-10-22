@@ -1,11 +1,13 @@
 
 let Simulation;
 let Renderer;
+let InputHandler;
 const App = new function() {
 
 	this.setup = function() {
-		Simulation 	= new _Simulation();
-		Renderer 	= new _Renderer(renderCanvas);
+		Simulation 		= new _Simulation();
+		Renderer 		= new _Renderer(renderCanvas);
+		InputHandler 	= new _InputHandler();
 
 		this.update();
 		this.draw();

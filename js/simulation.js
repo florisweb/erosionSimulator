@@ -2,14 +2,12 @@
 function _Simulation() {
 	this.world = {
 		size: 						new Vector(400, 300),
-		tileSize: 					10,
-		offset: 					new Vector(300, -50),
+		tileSize: 					50,
+		offset: 					new Vector(0, 0),
 		cameraHeightConstant: 		.7,
 		waterFlowConstant: 			1,
 		materialFlowConstant: 		.5,
 	}
-
-	this.world.offset.scale(1 / this.world.tileSize);
 
 	this.tileGrid = new _Simulation_tileGrid(this.world, 
 		function (x, y) {
