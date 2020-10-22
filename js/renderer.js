@@ -96,12 +96,12 @@ function _Renderer(_canvas) {
 		if (_object.isDrain) material = Renderer.materials.drain;
 		if (_object.isSource) material = Renderer.materials.source;
 		
-		drawTileBox(_x, _y, 0, _object.height, material, xNeighbour, yNeighbour);
+		drawTileBox(_x, _y, 0, _object.height, material, xNeighbour, yNeighbour, _object);
 		if (_object.waterHeight > .001) drawTileBox(_x, _y, _object.height, _object.waterHeight, Renderer.materials.water, xNeighbour, yNeighbour);
 	}
 
 
-	function drawTileBox(_x, _y, _startElevation = 0, _waterHeight = 1, _material, xNeighbour, yNeighbour) {
+	function drawTileBox(_x, _y, _startElevation = 0, _waterHeight = 1, _material, xNeighbour, yNeighbour, _object) {
 		let finalElevation = _startElevation + _waterHeight;
 		let startElevationLeft 	= _startElevation;
 		let startElevationRight = _startElevation;
@@ -137,6 +137,10 @@ function _Renderer(_canvas) {
 			let bottomRightGroundCoord 	= worldCoordToCanvCoord(new Vector(_x + 1 - startElevationRight, 	_y + 1 - startElevationRight));
 			drawTileSide(elevatedBottomCoord, elevatedRightCoord, bottomRightGroundCoord, rightGroundCoord, _material.side);
 		}
+
+		if (!_object) return;
+		ctx.fillStyle = "#000";
+		ctx.fillText("GS: " + Math.round(_object.grainSize * 100) / 100 + " H: " + Math.round(_object.height * 1000) / 1000, elevatedLeftCoord.value[0], elevatedLeftCoord.value[1]);
 	}	
 
 	function drawTileSide(elevatedBottomCoord, elevatedSideCoord, bottomGroundCoord, sideGroundCoord, _color) {

@@ -5,12 +5,12 @@
 
 function _Simulation() {
 	this.world = {
-		size: 						new Vector(500, 200),
-		tileSize: 					10,
+		size: 						new Vector(400, 300),
+		tileSize: 					50,
 		offset: 					new Vector(300, 0),
 		cameraHeightConstant: 		.7,
 		waterFlowConstant: 			5,
-		materialFlowConstant: 		.5,
+		materialFlowConstant: 		3,
 	}
 
 	this.world.offset.scale(1 / this.world.tileSize);
@@ -18,14 +18,14 @@ function _Simulation() {
 	this.tileGrid = new _Simulation_tileGrid(this.world, 
 		function (x, y) {
 			let obj = {
-				height: 		x * (5 - y) * .01 + 10 + Math.random() * 5,
-				// height: 5,
+				height: 2,// Math.abs((x) / 3 - y / 5) + (x == 0 && y == 0) * .6 + 1 * Math.random(),
 				waterHeight: 	0,
-				isDrain: 		x == 500 / 10 - 1,
-				isSource: 		x == 0 && y == 0
+				grainSize: 		(16 - x - y) / 18 * (1 - (y == 4 || x == 0)),// Math.abs((x) / 3 - y / 5),
+				isSource: 		x == 0 && y == 0,
+				isDrain: 		x == 7,
 			};
 			if (obj.isDrain) obj.height = 0;
-			if (obj.isSource) obj.height = 50;
+			// if (obj.isSource) obj.height = 50;
 			obj.totalHeight = obj.height + obj.waterHeight;
 
 			return obj;
@@ -39,6 +39,7 @@ function _Simulation() {
 				return {
 					waterHeight: 0,
 					height: 0,
+					grainSize: 0,
 				}
 			}
 		);
@@ -56,18 +57,23 @@ function _Simulation() {
 					deltaFlow 					+= Math.abs(waterFlow);
 					deltaGrid[x][y].waterHeight += waterFlow;
 
-					let sandFlow = waterFlow * Simulation.world.materialFlowConstant;
-					if (sandFlow < 0 && this.tileGrid[x][y].height < neighbours[n].height) sandFlow = 0;
-					if (sandFlow > 0 && this.tileGrid[x][y].height > neighbours[n].height) sandFlow = 0;
+					let sandFlow = deltaSandFormula(waterFlow, this.tileGrid[x][y], neighbours[n]);
 					deltaGrid[x][y].height += sandFlow;
 
+					// if (sandFlow > 0) //grainsize only changes when sand is added
+					// {
+					// 	let totalGrains 			= this.tileGrid[x][y].height * this.tileGrid[x][y].grainSize + sandFlow * neighbours[n].grainSize;
+					//  	let newGrainSize 			= totalGrains / (this.tileGrid[x][y].height + sandFlow);
+					//  	deltaGrid[x][y].grainSize 	= newGrainSize - this.tileGrid[x][y].grainSize;
+					// }
 					
+	
 					if (waterFlow > maxFlow) maxFlow = waterFlow;
 					if (this.tileGrid[x][y].isSource) this.tileGrid[x][y].waterHeight = 1;
 					if (this.tileGrid[x][y].isDrain) 
 					{
-						deltaGrid[x][y].waterHeight -= this.tileGrid[x][y].waterHeight * .005;
-						deltaGrid[x][y].height 		-= this.tileGrid[x][y].height * .005;
+						deltaGrid[x][y].waterHeight -= this.tileGrid[x][y].waterHeight * .01;
+						deltaGrid[x][y].height 		-= this.tileGrid[x][y].height * .01;
 					}
 				}
 			}
@@ -101,13 +107,24 @@ function _Simulation() {
 			if (dHeight > 0) equalibriumWaterSelf += dHeight;
 		}
 
-
 		return (equalibriumWaterSelf - _self.waterHeight) * Simulation.world.waterFlowConstant * _dt;
 	}
 
+	function deltaSandFormula(_waterFlow, _self, _other) {
+		let sandFlow = _waterFlow * Simulation.world.materialFlowConstant * Math.pow(1 - _self.grainSize, 4);
+		if (sandFlow < 0 && _self.height < _other.height) sandFlow = 0;
+		if (sandFlow > 0 && _self.height > _other.height) sandFlow = 0;
+		return sandFlow;
+	}
 
 	this.rain = function(_height) {
-		let rainGrid = new _Simulation_tileGrid(this.world, function () {return {waterHeight: _height, height: 0}});
+		let rainGrid = new _Simulation_tileGrid(this.world, function () {
+			return {
+				waterHeight: _height, 
+				height: 0, 
+				grainSize: 0
+			}
+		});
 		this.tileGrid.addGrid(rainGrid);
 	}
 }
@@ -156,6 +173,7 @@ function _Simulation_tileGrid(_world, _valueFunction) {
 			{
 				this[x][y].waterHeight 	+= _grid[x][y].waterHeight;
 				this[x][y].height 		+= _grid[x][y].height;
+				this[x][y].grainSize 	+= _grid[x][y].grainSize;
 				this[x][y].totalHeight 	= this[x][y].height + this[x][y].waterHeight;
 			}
 		}
