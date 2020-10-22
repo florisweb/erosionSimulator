@@ -140,7 +140,7 @@ function _Renderer(_canvas) {
 
 		if (!_object) return;
 		ctx.fillStyle = "#000";
-		ctx.fillText("GS: " + Math.round(_object.grainSize * 100) / 100 + " H: " + Math.round(_object.height * 1000) / 1000, elevatedLeftCoord.value[0], elevatedLeftCoord.value[1]);
+		// ctx.fillText("GS: " + Math.round(_object.grainSize * 100) / 100 + " H: " + Math.round(_object.height * 1000) / 1000, elevatedLeftCoord.value[0], elevatedLeftCoord.value[1]);
 	}	
 
 	function drawTileSide(elevatedBottomCoord, elevatedSideCoord, bottomGroundCoord, sideGroundCoord, _color) {
