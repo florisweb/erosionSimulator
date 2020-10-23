@@ -197,18 +197,21 @@ function _Renderer_camera() {
 	this.position 	= new Vector(9, 1);
 	this.zoom 		= 1;
 
-	let tileConstantX = Simulation.world.tileSize / Math.sqrt(2) * this.zoom;
-	let tileConstantY = Simulation.world.tileSize / Math.sqrt(2) * Simulation.world.cameraHeightConstant * this.zoom;
+	this.halfSize 	= (new Vector(600, 600)).scale(.5 / Simulation.world.tileSize);
+
+
+	let tileConstantX = Simulation.world.tileSize / Math.sqrt(2) / this.zoom;
+	let tileConstantY = Simulation.world.tileSize / Math.sqrt(2) * Simulation.world.cameraHeightConstant / this.zoom;
 
 	this.updateZoom = function(_newZoom) {
 		if (_newZoom < .1) _newZoom = .1;
 		this.zoom 		= _newZoom;
-		tileConstantX 	= Simulation.world.tileSize / Math.sqrt(2) * this.zoom;
-		tileConstantY 	= Simulation.world.tileSize / Math.sqrt(2) * Simulation.world.cameraHeightConstant * this.zoom;
+		tileConstantX 	= Simulation.world.tileSize / Math.sqrt(2) / this.zoom;
+		tileConstantY 	= Simulation.world.tileSize / Math.sqrt(2) * Simulation.world.cameraHeightConstant / this.zoom;
 	}
 
 	this.worldCoordToCanvCoord = function(_coord) {
-		let newCoord = _coord.copy().add(Simulation.world.offset).add(this.position);
+		let newCoord = _coord.copy().add(this.position).add(this.halfSize);
 		let x = (newCoord.value[0] - newCoord.value[1]) * tileConstantX;
 		let y = (newCoord.value[0] + newCoord.value[1]) * tileConstantY;
 
@@ -220,7 +223,7 @@ function _Renderer_camera() {
 		newCoord.value[1] = (_coord.value[1] / tileConstantY - _coord.value[0] / tileConstantX) * .5;
 		newCoord.value[0] = _coord.value[0] / tileConstantX + newCoord.value[1];
 
-		return newCoord.add(Simulation.world.offset.copy().add(this.position).scale(-1));
+		return newCoord.add(this.position.copy().add(this.halfSize).scale(-1));
 	}
 }
 

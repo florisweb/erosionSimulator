@@ -17,7 +17,7 @@ function _InputHandler() {
 		this.dragSpeed = 1;
 		this.scrollSpeed = .003
 	}
-	// assignMouseDrager();
+	assignMouseDrager();
 	// assignMouseMoveHandler();
 
 
@@ -49,8 +49,7 @@ function _InputHandler() {
 	    Renderer.camera.updateZoom(Renderer.camera.zoom + event.deltaY * InputHandler.settings.scrollSpeed);
 
 	    let endWorldPosition = Renderer.camera.canvCoordToWorldCoord(mousePosition);
-	    console.log(endWorldPosition.difference(startWorldPosition).value);
-	    Renderer.camera.position.add(endWorldPosition.difference(startWorldPosition));
+	    Renderer.camera.position.add(endWorldPosition.difference(startWorldPosition).scale(-1));
 	    
 	    return false; 
 	}, false);
@@ -81,38 +80,37 @@ function _InputHandler() {
 
 
 
-	// function assignMouseDrager() {
-	// 	HTML.canvas.addEventListener("mousedown", 
-	//     	function (_event) {
-	//       		InputHandler.draging = true;
-	//     	}
-	//   	);
+	function assignMouseDrager() {
+		HTML.canvas.addEventListener("mousedown", 
+	    	function (_event) {
+	      		InputHandler.draging = true;
+	    	}
+	  	);
 
-	//   	HTML.canvas.addEventListener("mouseup", stopDraging);
+	  	HTML.canvas.addEventListener("mouseup", stopDraging);
 
-	//   	let prevDragVector = false;
-	// 	HTML.canvas.addEventListener("mousemove", 
-	// 	    function (_event) {
-	// 	    	if (!InputHandler.draging) return;
-	// 	    	if (!InputHandler.mouseDown) return stopDraging();
-	// 	    	RenderEngine.camera.follow(false);
+	  	let prevDragVector = false;
+		HTML.canvas.addEventListener("mousemove", 
+		    function (_event) {
+		    	if (!InputHandler.draging) return;
+		    	if (!InputHandler.mouseDown) return stopDraging();
 
-	// 	    	if (prevDragVector)
-	// 	    	{
-	// 	    		let deltaPos = new Vector([_event.screenX, _event.screenY]).difference(prevDragVector);
-	// 	    		let moveVector = deltaPos.scale(InputHandler.settings.dragSpeed * RenderEngine.camera.zoom);
-	// 	    		RenderEngine.camera.position.add(moveVector);
-	// 	    	}
+		    	if (prevDragVector)
+		    	{
+		    		let deltaPos = new Vector(_event.screenX, _event.screenY).difference(prevDragVector);
+		    		let moveVector = deltaPos.scale(-InputHandler.settings.dragSpeed);
+		    		Renderer.camera.position.add(Renderer.camera.canvCoordToWorldCoord(moveVector).add(Renderer.camera.position).add(Renderer.camera.halfSize));
+		    	}
 
-	// 	    	prevDragVector = new Vector([_event.screenX, _event.screenY]);
-	// 	    }
-	// 	);
+		    	prevDragVector = new Vector(_event.screenX, _event.screenY);
+		    }
+		);
 		
-	// 	function stopDraging() {
-	// 		InputHandler.draging = false;
-	//       	prevDragVector = false;
-	// 	}
-	// }
+		function stopDraging() {
+			InputHandler.draging = false;
+	      	prevDragVector = false;
+		}
+	}
 
 }
 

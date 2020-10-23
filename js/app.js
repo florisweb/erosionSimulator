@@ -23,8 +23,8 @@ const App = new function() {
 		App.updates++;
 		let dt = (new Date() - lastFrame) / 1000;
 		
-		let redrawRequired = Simulation.update(dt);
-		if (redrawRequired || App.updates % 100 == 0) requestRedraw = true;
+		// let redrawRequired = Simulation.update(dt);
+		// if (redrawRequired || App.updates % 100 == 0) requestRedraw = true;
 		
 		lastFrame = new Date();
 		setTimeout(App.update, 0);
@@ -35,7 +35,7 @@ const App = new function() {
 	this.frames = 0;
 	this.draw = function() {
 		App.frames++;
-		if (requestRedraw) 
+		// if (requestRedraw) 
 		{
 			Renderer.draw(Simulation.tileGrid);
 			requestRedraw = false;
