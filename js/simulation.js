@@ -2,7 +2,7 @@
 function _Simulation() {
 	this.world = {
 		size: 						new Vector(400, 300),
-		tileSize: 					50,
+		tileSize: 					20,
 		offset: 					new Vector(0, 0),
 		cameraHeightConstant: 		.7,
 		waterFlowConstant: 			1,

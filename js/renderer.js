@@ -1,7 +1,7 @@
 
 function _Renderer(_canvas) {
 	let Canvas 	= _canvas;
-	let ctx 	= Canvas.getContext("2d");
+	let ctx 	= Canvas.getContext("2d", {alpha: false});
 	let This 	= this;
 
 	this.config = {
