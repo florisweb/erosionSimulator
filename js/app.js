@@ -1,13 +1,13 @@
 
 let Simulation;
 let Renderer;
-let InputHandler;
+// let InputHandler;
 const App = new function() {
 
 	this.setup = function() {
 		Simulation 		= new _Simulation();
-		Renderer 		= new _Renderer(renderCanvas);
-		InputHandler 	= new _InputHandler();
+		Renderer 		= new _Renderer();
+		// InputHandler 	= new _InputHandler();
 
 		this.update();
 		this.draw();
@@ -22,8 +22,8 @@ const App = new function() {
 		App.updates++;
 		let dt = (new Date() - lastFrame) / 1000;
 		
-		let redrawRequired = Simulation.update(dt);
-		if (redrawRequired || App.updates % 100 == 0) Renderer.requestRedraw = true;
+		// let redrawRequired = Simulation.update(dt);
+		// if (redrawRequired || App.updates % 100 == 0) Renderer.requestRedraw = true;
 		
 		lastFrame = new Date();
 		setTimeout(App.update, 0);
@@ -34,11 +34,11 @@ const App = new function() {
 	this.frames = 0;
 	this.draw = function() {
 		App.frames++;
-		if (Renderer.requestRedraw) 
-		{
+		// if (Renderer.requestRedraw) 
+		// {
 			Renderer.draw(Simulation.tileGrid);
-			Renderer.requestRedraw = false;
-		}
+		// 	Renderer.requestRedraw = false;
+		// }
 
 		requestAnimationFrame(App.draw);
 	}
