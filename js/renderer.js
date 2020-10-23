@@ -2,11 +2,11 @@
 function _Renderer(_canvas) {
 	let Canvas 	= _canvas;
 	let ctx 	= Canvas.getContext("2d");
+
 	this.config = {
 		minimumAverageFlowForUpdate: 0.001,
 		minimumFlowForUpdate: 0.01
 	};
-
 
 	this.materials = {
 		water: {
@@ -55,15 +55,11 @@ function _Renderer(_canvas) {
 		}
 	}
 
-	this.requestRedraw = true;
+	this.requestRedraw 	= true;
+	this.camera 		= new _Renderer_camera();
 
 
 
-	this.camera = new _Renderer_camera();
-
-	this.clear = function() {
-		ctx.clearRect(0, 0, Canvas.width, Canvas.height);
-	}
 
 	let lastFPSUpdate = new Date();
 	const framesPerFPSSample = 3;
@@ -180,13 +176,18 @@ function _Renderer(_canvas) {
 		
 		if (_color.strokeStyle)ctx.stroke();
 		ctx.fill();
+	}
 
+	this.clear = function() {
+		ctx.clearRect(0, 0, Canvas.width, Canvas.height);
 	}
 
 
-	function valueToColor(_value) {
-		return "rgb(" + _value * 51 + ", 0, 0)";
+	window.onresize = function() {
+		let scalar = Canvas.height / Canvas.offsetHeight;
+		Canvas.width = scalar * Canvas.offsetWidth;
 	}
+	window.onresize();
 }
 
 
@@ -198,9 +199,6 @@ function _Renderer(_canvas) {
 function _Renderer_camera() {
 	this.position 	= new Vector(9, 1);
 	this.zoom 		= 1;
-
-	this.halfSize 	= (new Vector(600, 600)).scale(.5 / Simulation.world.tileSize);
-
 
 	let tileConstantX = Simulation.world.tileSize / Math.sqrt(2) / this.zoom;
 	let tileConstantY = Simulation.world.tileSize / Math.sqrt(2) * Simulation.world.cameraHeightConstant / this.zoom;
@@ -214,7 +212,7 @@ function _Renderer_camera() {
 	}
 
 	this.worldCoordToCanvCoord = function(_coord) {
-		let newCoord = _coord.copy().add(this.position).add(this.halfSize);
+		let newCoord = _coord.copy().add(this.position);
 		let x = (newCoord.value[0] - newCoord.value[1]) * tileConstantX;
 		let y = (newCoord.value[0] + newCoord.value[1]) * tileConstantY;
 
@@ -226,7 +224,7 @@ function _Renderer_camera() {
 		newCoord.value[1] = (_coord.value[1] / tileConstantY - _coord.value[0] / tileConstantX) * .5;
 		newCoord.value[0] = _coord.value[0] / tileConstantX + newCoord.value[1];
 
-		return newCoord.add(this.position.copy().add(this.halfSize).scale(-1));
+		return newCoord.add(this.position.copy().scale(-1));
 	}
 }
 

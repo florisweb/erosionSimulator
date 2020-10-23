@@ -99,7 +99,7 @@ function _InputHandler() {
 		    	{
 		    		let deltaPos 			= new Vector(_event.screenX, _event.screenY).difference(prevDragVector);
 		    		let moveVector 			= deltaPos.scale(-InputHandler.settings.dragSpeed);
-		    		Renderer.camera.position.add(Renderer.camera.canvCoordToWorldCoord(moveVector).add(Renderer.camera.position).add(Renderer.camera.halfSize));
+		    		Renderer.camera.position.add(Renderer.camera.canvCoordToWorldCoord(moveVector).add(Renderer.camera.position));
 		    		Renderer.requestRedraw 	= true;
 		    	}
 
