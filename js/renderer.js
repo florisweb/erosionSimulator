@@ -4,7 +4,7 @@ function _Renderer(_canvas) {
 	let ctx 	= Canvas.getContext("2d");
 	this.config = {
 		minimumAverageFlowForUpdate: 0.001,
-		minimumFlowForUpdate: 0.000
+		minimumFlowForUpdate: 0.01
 	};
 
 
@@ -54,6 +54,8 @@ function _Renderer(_canvas) {
 			}
 		}
 	}
+
+	this.requestRedraw = true;
 
 
 
@@ -204,10 +206,11 @@ function _Renderer_camera() {
 	let tileConstantY = Simulation.world.tileSize / Math.sqrt(2) * Simulation.world.cameraHeightConstant / this.zoom;
 
 	this.updateZoom = function(_newZoom) {
-		if (_newZoom < .1) _newZoom = .1;
-		this.zoom 		= _newZoom;
-		tileConstantX 	= Simulation.world.tileSize / Math.sqrt(2) / this.zoom;
-		tileConstantY 	= Simulation.world.tileSize / Math.sqrt(2) * Simulation.world.cameraHeightConstant / this.zoom;
+		if (_newZoom < .1) 		_newZoom = .1;
+		this.zoom 				= _newZoom;
+		tileConstantX 			= Simulation.world.tileSize / Math.sqrt(2) / this.zoom;
+		tileConstantY 			= Simulation.world.tileSize / Math.sqrt(2) * Simulation.world.cameraHeightConstant / this.zoom;
+		Renderer.requestRedraw 	= true;
 	}
 
 	this.worldCoordToCanvCoord = function(_coord) {

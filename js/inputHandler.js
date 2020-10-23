@@ -97,9 +97,10 @@ function _InputHandler() {
 
 		    	if (prevDragVector)
 		    	{
-		    		let deltaPos = new Vector(_event.screenX, _event.screenY).difference(prevDragVector);
-		    		let moveVector = deltaPos.scale(-InputHandler.settings.dragSpeed);
+		    		let deltaPos 			= new Vector(_event.screenX, _event.screenY).difference(prevDragVector);
+		    		let moveVector 			= deltaPos.scale(-InputHandler.settings.dragSpeed);
 		    		Renderer.camera.position.add(Renderer.camera.canvCoordToWorldCoord(moveVector).add(Renderer.camera.position).add(Renderer.camera.halfSize));
+		    		Renderer.requestRedraw 	= true;
 		    	}
 
 		    	prevDragVector = new Vector(_event.screenX, _event.screenY);

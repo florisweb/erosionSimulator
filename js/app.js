@@ -16,15 +16,14 @@ const App = new function() {
 
 	let lastFrame = new Date();
 	let startTime = new Date();
-	let requestRedraw = true;
 
 	this.updates = 0;
 	this.update = function() {
 		App.updates++;
 		let dt = (new Date() - lastFrame) / 1000;
 		
-		// let redrawRequired = Simulation.update(dt);
-		// if (redrawRequired || App.updates % 100 == 0) requestRedraw = true;
+		let redrawRequired = Simulation.update(dt);
+		if (redrawRequired || App.updates % 100 == 0) Renderer.requestRedraw = true;
 		
 		lastFrame = new Date();
 		setTimeout(App.update, 0);
@@ -35,10 +34,10 @@ const App = new function() {
 	this.frames = 0;
 	this.draw = function() {
 		App.frames++;
-		// if (requestRedraw) 
+		if (Renderer.requestRedraw) 
 		{
 			Renderer.draw(Simulation.tileGrid);
-			requestRedraw = false;
+			Renderer.requestRedraw = false;
 		}
 
 		requestAnimationFrame(App.draw);
