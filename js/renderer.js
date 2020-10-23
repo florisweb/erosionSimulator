@@ -2,6 +2,7 @@
 function _Renderer(_canvas) {
 	let Canvas 	= _canvas;
 	let ctx 	= Canvas.getContext("2d");
+	let This 	= this;
 
 	this.config = {
 		minimumAverageFlowForUpdate: 0.001,
@@ -184,8 +185,9 @@ function _Renderer(_canvas) {
 
 
 	window.onresize = function() {
-		let scalar = Canvas.height / Canvas.offsetHeight;
-		Canvas.width = scalar * Canvas.offsetWidth;
+		let scalar			= Canvas.height / Canvas.offsetHeight;
+		Canvas.width 		= scalar * Canvas.offsetWidth;
+		This.requestRedraw 	= true;
 	}
 	window.onresize();
 }
